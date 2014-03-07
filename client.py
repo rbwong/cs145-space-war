@@ -36,7 +36,8 @@ if __name__ == '__main__':
 	receiver_thread.start()
 
 	while True:
-		send_msg = raw_input('Command: ').split(' ')
+		send_msg = raw_input('')
+		send_msg = send_msg.split(' ')
 
 		if send_msg[0] == 'QUIT':
 			connection_layer.sendMessage('QUIT ' + key + '\r\n\ndate: january')
@@ -46,10 +47,8 @@ if __name__ == '__main__':
 			connection_layer.sendMessage('TIME\r\n\ndate: january')
 
 		elif send_msg[0] == 'SETUSERNAME':
-			print 'set username command'
-			pass
+			connection_layer.sendMessage('SET\r\n\nusername: ' + send_msg[1])
 		elif send_msg[0] == 'SETSTATUS':
-			print 'set status command'
-			pass
+			connection_layer.sendMessage('SET\r\n\nstatus: ' + send_msg[1])
 		else:
 			print send_msg[0] + ": command not recognized"

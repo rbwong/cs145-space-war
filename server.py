@@ -42,14 +42,22 @@ def command_processor():
 
 			#parse message
 			command, headers = parse_message(message)
-			print command
+			print 'DEBUG', command
 
 			#process command
 			if command == 'TIME':
 				connection_layer.sendMessage("server: The date and time is " + str(datetime.datetime.now()))
 			elif command == 'SET':
 				args = parse_headers(headers)
-				connection_layer.sendMessage('new username for ' + username + ': is ' + args['username'])
+
+				#set username
+				if 'username' in args:
+					client_table[addr]['username'] = args['username']
+					connection_layer.sendMessage('New username is ' + args['username'])
+				#set status
+				elif 'status' in args:
+					client_table[addr]['status'] = args['status']
+					connection_layer.sendMessage('New status is ' + args['status'])
 			elif command == 'QUIT ' + key:
 				client_table[addr]['finalquit'] = True
 				connection_layer.sendMessage('QUIT2 ' + key)
