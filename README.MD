@@ -11,8 +11,9 @@ Task List:
 + Formats
     + SETUSERNAME <username>
     + SETSTATUS <status>
+    + LISTUSERS
     + SAY <msg>
-    + PM <username> <msg>
+    + PM <user_id> <msg>
 
 + Notes
 

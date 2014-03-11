@@ -13,8 +13,9 @@ key = '70d9573de68a1fa96488b8fbfb9476c8'
 
 """
 client_table schema {
-	'key': addr
+	'key': client_id
 
+	'addr': addr,
 	'connection_layer': None
 	'username': 'Anonymous'
 	'status': None
@@ -33,16 +34,16 @@ def command_processor():
 			#raw message
 			raw_requests = requests.pop(0)
 			message = raw_requests[0]
-			addr = raw_requests[1]
+			client_id = raw_requests[1]
 			
 			#fetch user data
-			username =  client_table[addr]['username']
-			status = client_table[addr]['status']
-			connection_layer = client_table[addr]['connection_layer']
+			username =  client_table[client_id]['username']
+			status = client_table[client_id]['status']
+			connection_layer = client_table[client_id]['connection_layer']
 
 			#parse message
 			command, headers = parse_message(message)
-			print 'DEBUG', command
+			print 'debug', command
 
 			#process command
 			if command == 'TIME':
@@ -52,50 +53,61 @@ def command_processor():
 
 				#set username
 				if 'username' in args:
-					client_table[addr]['username'] = args['username']
-					connection_layer.sendMessage('New username is ' + args['username'])
+					set_username(client_id, args['username'])
+					connection_layer.sendMessage('server: New username is ' + args['username'])
 				#set status
 				elif 'status' in args:
-					client_table[addr]['status'] = args['status']
-					connection_layer.sendMessage('New status is ' + args['status'])
+					set_status(client_id, args['status'])
+					connection_layer.sendMessage('server: New status is ' + args['status'])
+				#send message
+				elif 'message' in args:
+					send(receipient=int(args['receipient']), sender=client_id, message=args['message'])
+			elif command == 'GET':
+				args = parse_headers(headers)
+
+				#get user
+				if 'user' in args:
+					get_user(client_id, args['user'])
 			elif command == 'QUIT ' + key:
-				client_table[addr]['finalquit'] = True
+				client_table[client_id]['finalquit'] = True
 				connection_layer.sendMessage('QUIT2 ' + key)
 			else:
 				connection_layer.sendMessage("I can't understand what you're saying")
 
-def client(remote_socket, addr):
+def client(remote_socket, client_id):
 	connection_layer = connection.connection(remote_socket)
 	connection_layer.sendMessage("Client connected!")
 
 	#set connection_layer in 'db'
-	client_table[addr]['connection_layer'] = connection_layer
+	client_table[client_id]['connection_layer'] = connection_layer
 
 	while True:
 		message = connection_layer.getMessage()
 		command, headers = parse_message(message)
-		if command == ('QUIT3 ' + key) and client_table[addr]['finalquit']: 
-			client_table[addr]['connection_layer'].disconnect()
-			client_table.pop(addr, None)
-			print str(addr), "disconnected"
+		if command == ('QUIT3 ' + key) and client_table[client_id]['finalquit']: 
+			client_table[client_id]['connection_layer'].disconnect()
+			client_table.pop(client_id, None)
+			print "client", str(client_id), "disconnected"
 			break
-		requests.append((message, addr))
+		requests.append((message, client_id))
 
 def accept_clients(s):
+	id_counter = 69 #should be random
 	while True:
 		remote_socket, addr = s.accept()
 		print str(addr) + 'connected'
 
-		new_client = Thread(target = client, args = ((remote_socket, addr)))
+		new_client = Thread(target = client, args = ((remote_socket, id_counter)))
 
-		client_table[addr] = {'connection_layer': None,
+		client_table[id_counter] = {
+						'addr': addr,
+						'connection_layer': None,
 						'username': 'Anonymous',
-						'status': None,
-						'thread': new_client}
+						'status': '',
+						'thread': new_client
+						}
 		new_client.start()
-
-def send(receipient=None):
-	pass
+		id_counter += 1
 
 def parse_message(message):
 	raw = message.split('\r\n\n')
@@ -112,6 +124,31 @@ def parse_headers(headers):
 		context[headings[0]] = headings[1]
 
 	return context
+
+#GET COMMANDS
+def get_user(client_id, username):
+	if username == 'all':
+		for key in client_table.keys():
+			format_message  = 'id: ' + str(key) + ' username: ' + str(client_table[key]['username']) + ' status: ' + str(client_table[key]['status'] + '\n')
+			client_table[client_id]['connection_layer'].sendMessage(format_message)
+	else:
+		pass
+
+#SET COMMANDS
+def set_username(client_id, username):
+	client_table[client_id]['username'] = username
+
+def set_status(client_id, status):
+	client_table[client_id]['status'] = status
+
+def send(receipient=None, sender=None, message=''):
+	if receipient and receipient != 0:
+		client_table[receipient]['connection_layer'].sendMessage(client_table[sender]['username'] + ': ' + message)
+	elif receipient == 0:
+		for key in client_table.keys():
+			client_table[key]['connection_layer'].sendMessage(client_table[sender]['username'] + ': ' + message)
+	else:
+		print "debug: Send - no target"
 
 if __name__ == "__main__":
 	s = socket.socket()

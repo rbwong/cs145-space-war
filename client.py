@@ -45,10 +45,15 @@ if __name__ == '__main__':
 			break
 		elif send_msg[0] == 'TIME':
 			connection_layer.sendMessage('TIME\r\n\ndate: january')
-
 		elif send_msg[0] == 'SETUSERNAME':
 			connection_layer.sendMessage('SET\r\n\nusername: ' + send_msg[1])
 		elif send_msg[0] == 'SETSTATUS':
 			connection_layer.sendMessage('SET\r\n\nstatus: ' + send_msg[1])
+		elif send_msg[0] == 'SAY':
+			connection_layer.sendMessage('SET\r\n\nreceipient: 0\r\nmessage: ' + send_msg[1])	
+		elif send_msg[0] == 'SEND':
+			connection_layer.sendMessage('SET\r\n\nreceipient: ' + send_msg[1] + '\r\nmessage: ' + send_msg[2])	
+		elif send_msg[0] == 'LISTUSERS':
+			connection_layer.sendMessage('GET\r\n\nuser: all')
 		else:
 			print send_msg[0] + ": command not recognized"
