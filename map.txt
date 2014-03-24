@@ -1,0 +1,15 @@
+normal;normal;normal;black;black;normal;normal;normal;normal;normal;black;black;black;normal;normal;
+normal;normal;normal;black;black;normal;normal;normal;normal;normal;black;black;black;normal;normal;
+normal;black;normal;black;black;normal;normal;snow5;normal;normal;black;normal;normal;normal;normal;
+normal;black;normal;normal;black;black;black;normal;black;black;black;normal;black;black;normal;
+normal;black;black;normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;
+normal;black;black;normal;black;black;black;black;black;black;normal;black;normal;black;normal;
+normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;normal;black;normal;
+black;normal;black;normal;normal;black;normal;normal;normal;normal;black;black;normal;black;normal;
+black;normal;black;black;black;black;normal;black;black;normal;normal;normal;normal;normal;normal;
+normal;normal;normal;normal;black;normal;normal;black;black;normal;black;black;black;normal;black;
+normal;black;black;normal;black;normal;black;black;black;normal;normal;normal;black;normal;black;
+normal;normal;normal;normal;normal;normal;normal;normal;black;normal;black;normal;black;normal;normal;
+normal;normal;normal;black;black;normal;black;normal;normal;normal;normal;normal;normal;normal;black;
+black;normal;black;black;black;normal;normal;normal;black;black;black;normal;normal;normal;black;
+black;normal;black;black;black;black;black;black;black;black;black;normal;black;black;black
