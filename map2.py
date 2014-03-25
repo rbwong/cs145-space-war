@@ -1,6 +1,7 @@
 import os, sys
 import pygame
 from pygame.locals import *
+from map import Map
 from tile import Tile
 from unit import Unit
 
@@ -11,45 +12,52 @@ UnitList = {
     "Heavy Gunner" : {"HP" : 15, "AP" : 10, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
 }
 
-class Map:
-    def __init__(self):
-        self.map_width = 15
-        self.map_height = 15
-        self.pix_width = 50
-        self.pix_height = 50
-        self.margin = 1
+pygame.init() 
 
-        with open("map.txt") as myfile: #load map from txt
-            self.grid = [row.split(";") for row in myfile]
-
-
-if __name__ == "__main__":
+def initialize_map():
     grid = Map()
-
-    pygame.init()
-    # Set the pix_height and pix_width of the screen
-    size = [grid.map_width*grid.margin+grid.map_width*grid.pix_width, grid.map_height*grid.margin+grid.map_height*grid.pix_height]
+    size = [grid.map_width*grid.margin+grid.map_width*grid.pix_width, grid.map_height*grid.margin+grid.map_height*grid.pix_height] # Set the pix_height and pix_width of the screen
     screen = pygame.display.set_mode(size)
-    # Set title of screen
-    pygame.display.set_caption("Space Crusade")
-    #Loop until the user clicks the close button.
-    done = False
-    # Used to manage how fast the screen updates
-    clock = pygame.time.Clock()
-
+    pygame.display.set_caption("Space Crusade") # Set title of screen
+    done = False #Loop until the user clicks the close button.
+    clock = pygame.time.Clock() # Used to manage how fast the screen updates
     screen.fill(BLACK)
 
     # Draw Tiles
     tiles = pygame.sprite.Group()
     for x in range(grid.map_width):
         for y in range(grid.map_height):
-            print grid.grid[y][x]
             tiles.add(Tile(pygame.Rect(x*51, y*51, 50, 50), grid.grid[y][x]))
+
+    return grid, done, clock, screen, size, tiles
+
+def get_collidable_objects(tiles, units):
+    collidable = []
+    for tile in tiles: 
+        if tile.collide: collidable.append(tile)
+    for unit in units: 
+        collidable.append(unit)
+
+    return collidable
+
+if __name__ == "__main__":
+    grid, done, clock, screen, size, tiles = initialize_map()
+
+    #environment
+    turn = "red"
+    selected_unit = None
 
     # Draw units (experimental)
     units = pygame.sprite.Group()
-    snake = Unit(pygame.Rect(7*51, 2*51, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    units.add(snake)
+    sample_red = Unit(pygame.Rect(12*51, 15*51, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    units.add(sample_red)
+    sample_blue = Unit(pygame.Rect(8*51, 3*51, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    units.add(sample_blue)
+
+    selected_unit = sample_red
+
+    #get all collidable objects
+    collidable =  get_collidable_objects(tiles, units)
 
     while True:
         for event in pygame.event.get():
@@ -60,8 +68,14 @@ if __name__ == "__main__":
                 or (event.key == K_LEFT)
                 or (event.key == K_UP)
                 or (event.key == K_DOWN)):
-                    snake.move(event.key)
+                    selected_unit.move(event.key, collidable)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                x,y = event.pos
 
+                for unit in units:
+                    if unit.rect.collidepoint(x,y):
+                        selected_unit = unit
+                        
         tiles.draw(screen)
         units.draw(screen)
         pygame.display.flip()

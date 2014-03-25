@@ -2,6 +2,9 @@ import os, sys
 import pygame
 from pygame.locals import *
 
+UnitList = {"Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
+            "Heavy Gunner" : {"HP" : 15, "AP" : 10, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1}}
+
 class Unit(pygame.sprite.Sprite):
     def __init__(self, rect, unitName, unitDef, team):
         # Intrinsic Properties
@@ -13,20 +16,32 @@ class Unit(pygame.sprite.Sprite):
         self.walkCost = unitDef["walkCost"]
         self.turnCost = unitDef["turnCost"]
 
+        #set sprite
+        if team == "blue":
+            sprite = "blue_unit.png"
+            self.direction = K_DOWN
+        else:
+            sprite = "red_unit.png"
+            self.direction = K_UP
+
+        #tile movement rate
         self.x_dist = 51
         self.y_dist = 51
 
         # pygame
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join("images", unitDef["sprite"]))
+        self.image = pygame.image.load(os.path.join("images", sprite))
         if rect != None:
             self.rect = rect
+
+        #rotate red
+        if team == "red":
+            self.image = rot_image = pygame.transform.rotate(self.image, 180)
 
         # Extrinsic Properties
         self.team = team # "red", "blue"
         self.curHP = self.HP
         self.curAP = self.AP
-        self.direction = K_DOWN # "up", "down", "left", "right"
         self.x = -1
         self.y = -1
         self.overwatch = False
@@ -59,13 +74,13 @@ class Unit(pygame.sprite.Sprite):
         enemy.curHP = targetHP if targetHP > 0 else 0
 
 
-    def move(self, key):
+    def move(self, key, collidable):
         """Move your self in one of the 4 directions according to key"""
         """Key is the pyGame define for either up,down,left, or right key
         we will adjust outselfs in that direction"""
         xMove = 0;
         yMove = 0;
-        
+
         if (key == K_RIGHT):
             self.image, self.rect = self.rot_unit(self.image, self.rect, self.direction, key)
             xMove = self.x_dist
@@ -79,8 +94,28 @@ class Unit(pygame.sprite.Sprite):
             self.image, self.rect = self.rot_unit(self.image, self.rect, self.direction, key)
             yMove = self.y_dist
         #self.rect = self.rect.move(xMove,yMove);
-        self.rect.move_ip(xMove,yMove);
 
+        #remove self from collidable
+        collidable_objects = list(collidable)
+        collidable_objects.remove(self)
+        
+        self.rect.move_ip(xMove,0);
+
+        block_hit_list = pygame.sprite.spritecollide(self, collidable_objects, False)
+        for block in block_hit_list:
+            if xMove > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+
+        self.rect.move_ip(0,yMove);
+
+        block_hit_list = pygame.sprite.spritecollide(self, collidable_objects, False)
+        for block in block_hit_list:
+            if yMove > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
 
     def rot_unit(self, image, rect, direction, next_move):
         """rotate an image while keeping its center"""
@@ -121,13 +156,3 @@ class Unit(pygame.sprite.Sprite):
         else:
             rot_image = image
         return rot_image,rect
-
-
-UnitList = {"Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
-            "Heavy Gunner" : {"HP" : 15, "AP" : 10, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_up.png"}}
-
-if __name__ == "__main__":
-    gunner1 = Unit(unitName="Heavy Gunner", unitDef=UnitList["Heavy Gunner"], team="red")
-    gunner2 = Unit(unitName="Heavy Gunner", unitDef=UnitList["Heavy Gunner"], team="blue")
-    gunner1.attackEnemy(gunner2)
-    print "gunner2 HP:", str(gunner2.curHP)+"/"+str(gunner2.HP)

@@ -6,6 +6,10 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self, rect, floortype="black"):
         self.floortype = floortype # "black", "normal", "snow#"
         self.walkable = False if self.floortype == "black" else True
+        self.collide = False
+
+        if self.floortype == "black":
+            self.collide = True
 
         self.spriteDict = {
             "normal" : "floor.png",
