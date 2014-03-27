@@ -184,6 +184,7 @@ def get_collidable_objects(tiles, red_units, blue_units, doors):
 if __name__ == "__main__":
     s = socket.socket()
 
+    host = raw_input("Enter host: ")
     s.connect((host, port))
 
     connection_layer = connection.connection(s)
