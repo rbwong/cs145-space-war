@@ -78,13 +78,13 @@ class Unit(pygame.sprite.Sprite):
             top, bottom = self.rect.top, self.rect.bottom
             left, right = self.rect.left, self.rect.right
 
-            if door.rect.collidepoint(right+25,top+25):
+            if door.rect.collidepoint(right+25,top+25) and self.direction == K_RIGHT:
                 return door
-            elif door.rect.collidepoint(left-25,top+25):
+            elif door.rect.collidepoint(left-25,top+25)  and self.direction == K_LEFT:
                 return door
-            elif door.rect.collidepoint(left+25,top-25):
+            elif door.rect.collidepoint(left+25,top-25)  and self.direction == K_UP:
                 return door
-            elif door.rect.collidepoint(left+25,bottom+25):
+            elif door.rect.collidepoint(left+25,bottom+25)  and self.direction == K_DOWN:
                 return door
 
     def move(self, key, collidable):
