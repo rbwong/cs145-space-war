@@ -83,6 +83,7 @@ def command_processor():
 
 def client(remote_socket, client_id):
 	connection_layer = connection.connection(remote_socket)
+	connection_layer.sendMessage("assign: " + client_table[client_id]["team"])
 
 	#set connection_layer in 'db'
 	client_table[client_id]['connection_layer'] = connection_layer
@@ -105,7 +106,7 @@ def accept_clients(s):
 
 		new_client = Thread(target = client, args = ((remote_socket, id_counter)))
 
-		team = 'blue' if id_counter == 69 else 'red'
+		team = 'Blue' if id_counter == 69 else 'Red'
 		client_table[id_counter] = {
 						'addr': addr,
 						'connection_layer': None,

@@ -3,6 +3,7 @@
 import socket
 import connection
 from threading import Thread
+from random import random
 
 import os, sys
 import pygame
@@ -23,13 +24,18 @@ key = '70d9573de68a1fa96488b8fbfb9476c8'
 finalquit = False
 
 #game config
+class Environment:
+	def __init__(self):
+		self.turn = "Red"
+		self.team = None
+
 BLACK = (0,0,0)
 GREEN = (0,255,0)
 RED = (255,0,0)
 BLUE = (0,0,255)
 UnitList = {
 	"Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
-	"Heavy Gunner" : {"HP" : 15, "AP" : 999, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
+	"Heavy Gunner" : {"HP" : 15, "AP" : 6, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
 }
 
 
@@ -44,9 +50,8 @@ def parse_headers(headers):
 
 	return context
 
-def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles):
+def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles, genv):
 	# environment
-	turn = "Red"
 	color = RED
 
 	win = False
@@ -60,8 +65,9 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 			connection_layer.sendMessage('QUIT3 ' + key + '\r\n\ndate: january')
 			connection_layer.disconnect()
 			break
+		elif 'assign' in headers:
+			genv.team = headers['assign']
 		elif 'key' in headers:
-
 			# keyboard
 			key_pressed = headers['key']
 			if key_pressed in (str(K_LEFT),str(K_RIGHT),str(K_DOWN),str(K_UP)):
@@ -81,23 +87,25 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 					target = selected_unit.fire(projectiles, collidable, grid, screen)
 					print target
 					if isinstance(target, Unit):
-						if target.team =="red":
-							red_units.remove(target)
-						else:
-							blue_units.remove(target)
-						collidable.remove(target)
+						kill = random()
+						if kill < 0.17:
+							if target.team =="red":
+								red_units.remove(target)
+							else:
+								blue_units.remove(target)
+							collidable.remove(target)
 
 				
 			elif (key_pressed == str(K_RETURN)):
 				selected_unit.deselect()
-				if turn == "Red":
-					turn = "Blue"
+				if genv.turn == "Red":
+					genv.turn = "Blue"
 					color = BLUE
 					for unit in red_units:
 						unit.AP = 6
 					selected_unit = blue_units.sprites()[0]
-				elif turn == "Blue":
-					turn = "Red"
+				elif genv.turn == "Blue":
+					genv.turn = "Red"
 					color = RED
 					for unit in blue_units:
 						unit.AP = 6
@@ -110,7 +118,7 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 
 				flag = False
 				for unit in red_units:
-					if unit.rect.collidepoint(x,y) and turn == "Red" and unit.team == "red":
+					if unit.rect.collidepoint(x,y) and genv.turn == "Red" and unit.team == "red":
 						selected_unit.deselect()
 						selected_unit = unit
 						selected_unit.select()
@@ -118,7 +126,7 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 
 				if not flag:
 					for unit in blue_units:
-						if unit.rect.collidepoint(x,y) and turn == "Blue" and unit.team == "blue":
+						if unit.rect.collidepoint(x,y) and genv.turn == "Blue" and unit.team == "blue":
 							selected_unit.deselect()
 							selected_unit = unit
 							selected_unit.select()
@@ -130,7 +138,7 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 			blue_units.draw(screen)
 			fontobject1 = pygame.font.Font(None,22)
 			fontobject2 = pygame.font.Font(None,90)
-			screen.blit(fontobject1.render(turn+" Player's Turn",1,color),(grid.pix_width*13, grid.pix_height/3))
+			screen.blit(fontobject1.render(genv.turn+" Player's Turn",1,color),(grid.pix_width*13, grid.pix_height/3))
 			if selected_unit.AP > 0:
 				screen.blit(fontobject1.render("Current AP: "+str(selected_unit.AP), 1, GREEN),(grid.map_width/8*grid.pix_width, grid.pix_height/3))
 			else:
@@ -217,7 +225,7 @@ if __name__ == "__main__":
 	grid, done, clock, screen, size, tiles = initialize_map()
 
 	# environment
-	turn = "Red"
+	genv = Environment()
 	color = RED
 	selected_unit = None
 
@@ -290,10 +298,13 @@ if __name__ == "__main__":
 	projectiles = pygame.sprite.Group()
 
 	#start network threads
-	receiver_thread = Thread(target=receive_message, args=(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles))
+	receiver_thread = Thread(target=receive_message, args=(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles, genv))
 	receiver_thread.start()
 	receiver_thread = Thread(target=get_input, args=(connection_layer,))
 	receiver_thread.start()
+
+	while not genv.team:
+		pass
 
 	tiles.draw(screen)
 	doors.draw(screen)
@@ -301,7 +312,7 @@ if __name__ == "__main__":
 	blue_units.draw(screen)
 	fontobject1 = pygame.font.Font(None,22)
 	fontobject2 = pygame.font.Font(None,90)
-	screen.blit(fontobject1.render(turn+" Player's Turn",1,color),(grid.pix_width*13, grid.pix_height/3))
+	screen.blit(fontobject1.render(genv.turn+" Player's Turn",1,color),(grid.pix_width*13, grid.pix_height/3))
 	if selected_unit.AP > 0:
 		screen.blit(fontobject1.render("Current AP: "+str(selected_unit.AP), 1, GREEN),(grid.map_width/8*grid.pix_width, grid.pix_height/3))
 	else:
@@ -310,11 +321,14 @@ if __name__ == "__main__":
 
 	while True:
 		for event in pygame.event.get():
-			if event.type == pygame.QUIT: 
-				sys.exit()
-			elif event.type == KEYDOWN:
-				connection_layer.sendMessage('SET\r\n\nkey: ' + str(event.key))
+			print genv.turn, genv.team
+			if genv.turn == genv.team:
+				print "I should be able to move"
+				if event.type == pygame.QUIT: 
+					sys.exit()
+				elif event.type == KEYDOWN:
+					connection_layer.sendMessage('SET\r\n\nkey: ' + str(event.key))
 
-			elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-				x,y = event.pos
-				connection_layer.sendMessage('SET\r\n\nmouse: ' + 'left_mouse\r\n' + 'x: ' + str(x) + '\r\ny: ' + str(y))
+				elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+					x,y = event.pos
+					connection_layer.sendMessage('SET\r\n\nmouse: ' + 'left_mouse\r\n' + 'x: ' + str(x) + '\r\ny: ' + str(y))
