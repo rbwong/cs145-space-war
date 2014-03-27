@@ -84,11 +84,12 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 
 			elif (key_pressed == str(K_SPACE)):
 				if selected_unit.AP > 0:
-					target = selected_unit.fire(projectiles, collidable, grid, screen)
-					print target
+					target, dist = selected_unit.fire(projectiles, collidable, grid, screen)
 					if isinstance(target, Unit):
 						kill = random()
-						if kill < 0.17:
+						print "killchance:", str(kill), "dist:", str(dist)
+						if kill < 0.17*(0.9 ** dist):
+							print "killchance:", str(kill)
 							if target.team =="red":
 								red_units.remove(target)
 							else:
@@ -321,9 +322,7 @@ if __name__ == "__main__":
 
 	while True:
 		for event in pygame.event.get():
-			print genv.turn, genv.team
 			if genv.turn == genv.team:
-				print "I should be able to move"
 				if event.type == pygame.QUIT: 
 					sys.exit()
 				elif event.type == KEYDOWN:

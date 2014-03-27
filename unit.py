@@ -95,6 +95,8 @@ class Unit(pygame.sprite.Sprite):
 		enemy.curHP = targetHP if targetHP > 0 else 0
 
 	def fire(self, projectiles, collidable, grid, screen):
+		self.AP -= 1
+
 		# remove self from collidable objects
 		collidable_objects = list(collidable)
 		collidable_objects.remove(self)
@@ -106,6 +108,8 @@ class Unit(pygame.sprite.Sprite):
 		top, bottom = projectile.rect.top, projectile.rect.bottom
 		left, right = projectile.rect.left, projectile.rect.right
 
+		dist = 0
+
 		if self.direction == K_RIGHT:
 			top = top + 25
 			right = right + 25
@@ -113,8 +117,9 @@ class Unit(pygame.sprite.Sprite):
 				for item in collidable_objects:
 					if item.rect.collidepoint(right, top):
 						projectiles.remove(projectile)
-						return item
+						return item, dist
 				right = right + 50
+				dist += 1
 				projectile.rect.move_ip(self.x_dist, 0)
 
 		elif self.direction == K_LEFT:
@@ -124,8 +129,9 @@ class Unit(pygame.sprite.Sprite):
 				for item in collidable_objects:
 					if item.rect.collidepoint(left, top):
 						projectiles.remove(projectile)
-						return item
+						return item, dist
 				left = left - 50
+				dist += 1
 				projectile.rect.move_ip(self.x_dist, 0)
 
 		elif self.direction == K_DOWN:
@@ -136,8 +142,9 @@ class Unit(pygame.sprite.Sprite):
 				for item in collidable_objects:
 					if item.rect.collidepoint(left, bottom):
 						projectiles.remove(projectile)
-						return item
+						return item, dist
 				bottom = bottom + 50
+				dist += 1
 				projectile.rect.move_ip(0, self.y_dist)
 
 		else:
@@ -147,8 +154,9 @@ class Unit(pygame.sprite.Sprite):
 				for item in collidable_objects:
 					if item.rect.collidepoint(left, top):
 						projectiles.remove(projectile)
-						return item
+						return item, dist
 				top = top - 50
+				dist += 1
 				projectile.rect.move_ip(0, self.y_dist)
 
 		print "THIS SHOULDN'T PRINT"
