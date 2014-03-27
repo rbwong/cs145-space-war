@@ -11,7 +11,7 @@ BLACK = (0,0,0)
 
 UnitList = {
     "Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
-    "Heavy Gunner" : {"HP" : 15, "AP" : 10, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
+    "Heavy Gunner" : {"HP" : 15, "AP" : 6, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
 }
 
 pygame.init() 
@@ -47,76 +47,76 @@ def get_collidable_objects(tiles, red_units, blue_units, doors):
     return collidable
 
 if __name__ == "__main__":
-    grid, done, clock, screen, size, tiles = initialize_map()
+	grid, done, clock, screen, size, tiles = initialize_map()
 
-    #environment
-    turn = "red"
-    selected_unit = None
+	#environment
+	turn = "red"
+	selected_unit = None
 
-    # Love is an open DOOOR
-    doors = pygame.sprite.Group()
-    door = Door(pygame.Rect(8*grid.pix_width, 3*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(1*grid.pix_width, 10*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(2*grid.pix_width, 7*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(7*grid.pix_width, 8*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(10*grid.pix_width, 9*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(14*grid.pix_width, 10*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(15*grid.pix_width, 7*grid.pix_height, 50, 50))
-    doors.add(door)
-    door = Door(pygame.Rect(3*grid.pix_width, 9*grid.pix_height, 50, 50),"vertical")
-    doors.add(door)
-    door = Door(pygame.Rect(12*grid.pix_width, 8*grid.pix_height, 50, 50),"vertical")
-    doors.add(door)
-    door = Door(pygame.Rect(6*grid.pix_width, 4*grid.pix_height, 50, 50),"vertical")
-    doors.add(door)
-    door = Door(pygame.Rect(10*grid.pix_width, 4*grid.pix_height, 50, 50),"vertical")
-    doors.add(door)
+	# Love is an open DOOOR
+	doors = pygame.sprite.Group()
+	door = Door(pygame.Rect(8*grid.pix_width, 3*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(1*grid.pix_width, 10*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(2*grid.pix_width, 7*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(7*grid.pix_width, 8*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(10*grid.pix_width, 9*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(14*grid.pix_width, 10*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(15*grid.pix_width, 7*grid.pix_height, 50, 50))
+	doors.add(door)
+	door = Door(pygame.Rect(3*grid.pix_width, 9*grid.pix_height, 50, 50),"vertical")
+	doors.add(door)
+	door = Door(pygame.Rect(12*grid.pix_width, 8*grid.pix_height, 50, 50),"vertical")
+	doors.add(door)
+	door = Door(pygame.Rect(6*grid.pix_width, 4*grid.pix_height, 50, 50),"vertical")
+	doors.add(door)
+	door = Door(pygame.Rect(10*grid.pix_width, 4*grid.pix_height, 50, 50),"vertical")
+	doors.add(door)
 
-    # Draw Red units
-    red_units = pygame.sprite.Group()
-    sample_red = Unit(pygame.Rect(8*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(7*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(6*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(2*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(12*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(13*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(14*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
-    red_units.add(sample_red)
+	# Draw Red units
+	red_units = pygame.sprite.Group()
+	sample_red = Unit(pygame.Rect(8*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
+	sample_red = Unit(pygame.Rect(7*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
+	sample_red = Unit(pygame.Rect(6*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
+	sample_red = Unit(pygame.Rect(2*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
+	sample_red = Unit(pygame.Rect(12*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
+	sample_red = Unit(pygame.Rect(13*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
+	sample_red = Unit(pygame.Rect(14*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+	red_units.add(sample_red)
 
-    # Draw Blue units
-    blue_units = pygame.sprite.Group()
-    sample_blue = Unit(pygame.Rect(5*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(1*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(4*grid.pix_width, 3*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(8*grid.pix_width, 6*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(13*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(15*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(11*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
-    blue_units.add(sample_blue)
+	# Draw Blue units
+	blue_units = pygame.sprite.Group()
+	sample_blue = Unit(pygame.Rect(5*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
+	sample_blue = Unit(pygame.Rect(1*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
+	sample_blue = Unit(pygame.Rect(4*grid.pix_width, 3*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
+	sample_blue = Unit(pygame.Rect(8*grid.pix_width, 6*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
+	sample_blue = Unit(pygame.Rect(13*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
+	sample_blue = Unit(pygame.Rect(15*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
+	sample_blue = Unit(pygame.Rect(11*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+	blue_units.add(sample_blue)
 
-    selected_unit = sample_red
-    selected_unit.select()
+	selected_unit = sample_red
+	selected_unit.select()
 
-    #get all collidable objects
-    collidable =  get_collidable_objects(tiles, red_units, blue_units, doors)
+	#get all collidable objects
+	collidable =  get_collidable_objects(tiles, red_units, blue_units, doors)
 
 	while True:
 		for event in pygame.event.get():
@@ -174,15 +174,15 @@ if __name__ == "__main__":
 							selected_unit.select()
 				print selected_unit.AP
 
-        tiles.draw(screen)
-        doors.draw(screen)
-        red_units.draw(screen)
-        blue_units.draw(screen)
+		tiles.draw(screen)
+		doors.draw(screen)
+		red_units.draw(screen)
+		blue_units.draw(screen)
 		if not blue_units.sprites() and red_units.sprites():
 			print "RED WINS!"
 			break
 		elif not red_units.sprites() and blue_units.sprites():
 			print "BLUE WINS!"
 			break
-        pygame.display.flip()
-        pass
+		pygame.display.flip()
+		pass
