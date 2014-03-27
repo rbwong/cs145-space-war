@@ -7,6 +7,7 @@ from threading import Thread
 import os, sys
 import pygame
 from pygame.locals import *
+
 from map import Map
 from door import Door
 from tile import Tile
@@ -31,7 +32,7 @@ def parse_headers(headers):
 
     return context
 
-def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable):
+def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles):
     while True:
         recv_msg = connection_layer.getMessage()
 
@@ -42,6 +43,8 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
             connection_layer.disconnect()
             break
         elif 'key' in headers:
+
+            # keyboard
             key_pressed = headers['key']
             if ((key_pressed == str(K_RIGHT))
             or (key_pressed == str(K_LEFT))
@@ -57,7 +60,35 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
                     door.open = True
                     door.setDoor()
 
-            if key_pressed == "left_mouse":# and event.button == 1:
+            elif (key_pressed == str(K_SPACE)):
+                if selected_unit.AP > 0:
+                    target = selected_unit.fire(projectiles, collidable, grid, screen)
+                    print target
+                    if isinstance(target, Unit):
+                        if target.team =="red":
+                            red_units.remove(target)
+                        else:
+                            blue_units.remove(target)
+                        collidable.remove(target)
+
+                
+            elif (key_pressed == str(K_RETURN)):
+                selected_unit.deselect()
+                if turn == "red":
+                    turn = "blue"
+                    for unit in red_units:
+                        unit.AP = 6
+                    selected_unit = blue_units.sprites()[0]
+                elif turn == "blue":
+                    turn = "red"
+                    for unit in blue_units:
+                        unit.AP = 6
+                    selected_unit = red_units.sprites()[0]
+                selected_unit.select()
+                print turn
+
+            # mouse
+            elif key_pressed == "left_mouse":# and event.button == 1:
                 x,y = int(headers['x']), int(headers['y'])
 
                 flag = False
@@ -75,11 +106,16 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
                             selected_unit = unit
                             selected_unit.select()
 
+            projectiles.draw(screen)
             tiles.draw(screen)
             doors.draw(screen)
             red_units.draw(screen)
             blue_units.draw(screen)
             pygame.display.flip()
+            if not blue_units.sprites() and red_units.sprites():
+                print "RED WINS!"
+            elif not red_units.sprites() and blue_units.sprites():
+                print "BLUE WINS!"
         else:
             finalquit = False
         print recv_msg
@@ -111,39 +147,39 @@ def get_input(connection_layer):
 BLACK = (0,0,0)
 
 UnitList = {
-    "Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
-    "Heavy Gunner" : {"HP" : 15, "AP" : 10, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
+	"Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
+	"Heavy Gunner" : {"HP" : 15, "AP" : 99, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
 }
 
 def initialize_map():
-    grid = Map()
-    size = [grid.map_width*grid.margin+grid.map_width*grid.pix_width, grid.map_height*grid.margin+grid.map_height*grid.pix_height] # Set the pix_height and pix_width of the screen
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption("Space Crusade") # Set title of screen
-    done = False #Loop until the user clicks the close button.
-    clock = pygame.time.Clock() # Used to manage how fast the screen updates
-    screen.fill(BLACK)
+	grid = Map()
+	size = [grid.map_width*grid.margin+grid.map_width*grid.pix_width, grid.map_height*grid.margin+grid.map_height*grid.pix_height] # Set the pix_height and pix_width of the screen
+	screen = pygame.display.set_mode(size)
+	pygame.display.set_caption("Space Crusade") # Set title of screen
+	done = False #Loop until the user clicks the close button.
+	clock = pygame.time.Clock() # Used to manage how fast the screen updates
+	screen.fill(BLACK)
 
-    # Draw Tiles
-    tiles = pygame.sprite.Group()
-    for x in range(grid.map_width):
-        for y in range(grid.map_height):
-            tiles.add(Tile(pygame.Rect(x*51, y*51, 50, 50), grid.grid[y][x]))
+	# Draw Tiles
+	tiles = pygame.sprite.Group()
+	for x in range(grid.map_width):
+		for y in range(grid.map_height):
+			tiles.add(Tile(pygame.Rect(x*50, y*50, 50, 50), grid.grid[y][x]))
 
-    return grid, done, clock, screen, size, tiles
+	return grid, done, clock, screen, size, tiles
 
 def get_collidable_objects(tiles, red_units, blue_units, doors):
-    collidable = []
-    for tile in tiles: 
-        if tile.collide: collidable.append(tile)
-    for unit in red_units: 
-        collidable.append(unit)
-    for unit in blue_units: 
-        collidable.append(unit)
-    for door in doors: 
-        collidable.append(door)
+	collidable = []
+	for tile in tiles: 
+		if tile.collide: collidable.append(tile)
+	for unit in red_units: 
+		collidable.append(unit)
+	for unit in blue_units: 
+		collidable.append(unit)
+	for door in doors: 
+		collidable.append(door)
 
-    return collidable
+	return collidable
 
 if __name__ == "__main__":
     s = socket.socket()
@@ -156,67 +192,67 @@ if __name__ == "__main__":
 
     grid, done, clock, screen, size, tiles = initialize_map()
 
-    #environment
+    # environment
     turn = "red"
     selected_unit = None
 
     # Love is an open DOOOR
     doors = pygame.sprite.Group()
-    door = Door(pygame.Rect(8*51, 3*51, 51, 51))
+    door = Door(pygame.Rect(8*grid.pix_width, 3*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(1*51, 10*51, 51, 51))
+    door = Door(pygame.Rect(1*grid.pix_width, 10*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(2*51, 7*51, 51, 51))
+    door = Door(pygame.Rect(2*grid.pix_width, 7*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(7*51, 8*51, 51, 51))
+    door = Door(pygame.Rect(7*grid.pix_width, 8*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(10*51, 9*51, 51, 51))
+    door = Door(pygame.Rect(10*grid.pix_width, 9*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(14*51, 10*51, 51, 51))
+    door = Door(pygame.Rect(14*grid.pix_width, 10*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(15*51, 7*51, 51, 51))
+    door = Door(pygame.Rect(15*grid.pix_width, 7*grid.pix_height, 50, 50))
     doors.add(door)
-    door = Door(pygame.Rect(3*51, 9*51, 51, 51),"vertical")
+    door = Door(pygame.Rect(3*grid.pix_width, 9*grid.pix_height, 50, 50),"vertical")
     doors.add(door)
-    door = Door(pygame.Rect(12*51, 8*51, 51, 51),"vertical")
+    door = Door(pygame.Rect(12*grid.pix_width, 8*grid.pix_height, 50, 50),"vertical")
     doors.add(door)
-    door = Door(pygame.Rect(6*51, 4*51, 51, 51),"vertical")
+    door = Door(pygame.Rect(6*grid.pix_width, 4*grid.pix_height, 50, 50),"vertical")
     doors.add(door)
-    door = Door(pygame.Rect(10*51, 4*51, 51, 51),"vertical")
+    door = Door(pygame.Rect(10*grid.pix_width, 4*grid.pix_height, 50, 50),"vertical")
     doors.add(door)
 
     # Draw Red units
     red_units = pygame.sprite.Group()
-    sample_red = Unit(pygame.Rect(8*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(8*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(7*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(7*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(6*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(6*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(2*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(2*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(12*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(12*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(13*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(13*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
-    sample_red = Unit(pygame.Rect(14*51, 13*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(14*grid.pix_width, 13*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     red_units.add(sample_red)
 
     # Draw Blue units
     blue_units = pygame.sprite.Group()
-    sample_blue = Unit(pygame.Rect(5*51, 4*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(5*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(1*51, 4*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(1*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(4*51, 3*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(4*grid.pix_width, 3*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(8*51, 6*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(8*grid.pix_width, 6*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(13*51, 4*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(13*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(15*51, 4*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(15*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
-    sample_blue = Unit(pygame.Rect(11*51, 4*51, 51, 51), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(11*grid.pix_width, 4*grid.pix_height, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     blue_units.add(sample_blue)
 
     selected_unit = sample_red
@@ -225,8 +261,11 @@ if __name__ == "__main__":
     #get all collidable objects
     collidable =  get_collidable_objects(tiles, red_units, blue_units, doors)
 
+    # projectiles group
+    projectiles = pygame.sprite.Group()
+
     #start network threads
-    receiver_thread = Thread(target=receive_message, args=(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable))
+    receiver_thread = Thread(target=receive_message, args=(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles))
     receiver_thread.start()
     receiver_thread = Thread(target=get_input, args=(connection_layer,))
     receiver_thread.start()
