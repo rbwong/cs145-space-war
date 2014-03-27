@@ -134,17 +134,21 @@ class Unit(pygame.sprite.Sprite):
         if self.team == "blue":
             sprite = "blue_unit_sel.png"
             self.image = pygame.image.load(os.path.join("images", sprite))
+            self.image, self.rect = self.rot_unit(self.image, self.rect, K_UP, self.direction)
         else:
             sprite = "red_unit_sel.png"
             self.image = pygame.image.load(os.path.join("images", sprite))
+            self.image, self.rect = self.rot_unit(self.image, self.rect, K_UP, self.direction)
             
     def deselect(self):
         if self.team == "blue":
             sprite = "blue_unit.png"
             self.image = pygame.image.load(os.path.join("images", sprite))
+            self.image, self.rect = self.rot_unit(self.image, self.rect, K_DOWN, self.direction)
         else:
             sprite = "red_unit.png"
             self.image = pygame.image.load(os.path.join("images", sprite))
+            self.image, self.rect = self.rot_unit(self.image, self.rect, K_DOWN, self.direction)
 
     def rot_unit(self, image, rect, direction, next_move):
         """rotate an image while keeping its center"""

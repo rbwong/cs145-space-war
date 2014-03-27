@@ -132,7 +132,8 @@ if __name__ == "__main__":
                     door = selected_unit.openDoor(doors)
                     if door:
                         collidable.remove(door)
-                        doors.remove(door)
+                        door.open = True
+                        door.setDoor()
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 x,y = event.pos
