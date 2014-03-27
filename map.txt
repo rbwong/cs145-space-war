@@ -1,8 +1,8 @@
 black;black;black;black;black;black;snow6;snow6;snow5;snow5;snow5;black;black;black;black;black;black;
 black;normal;snow1;snow2;black;black;snow5;snow6;snow6;snow6;snow6;black;black;black;normal;normal;black;
 black;normal;black;snow2;black;black;snow5;snow6;snow5;snow6;snow5;black;snow4;normal;normal;normal;black;
-black;normal;black;snow3;snow4;black;black;black;normal;black;black;black;snow4;black;black;snow1;black;
-black;normal;black;black;snow4;snow5;normal;snow5;snow5;snow4;normal;snow4;snow4;snow3;snow2;snow1;black;
+black;normal;black;snow3;snow4;black;black;black;snow5;black;black;black;snow4;black;black;snow1;black;
+black;normal;black;black;snow4;snow5;snow4;snow5;snow5;snow4;snow5;snow4;snow4;snow3;snow2;snow1;black;
 black;normal;black;black;snow4;black;black;black;black;black;black;snow3;black;snow2;black;snow1;black;
 black;normal;normal;snow3;snow3;snow2;normal;normal;normal;normal;normal;snow2;snow3;snow2;black;normal;black;
 black;black;normal;black;normal;normal;black;normal;normal;normal;normal;black;black;snow1;black;normal;black;
