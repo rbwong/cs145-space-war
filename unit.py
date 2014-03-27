@@ -73,6 +73,19 @@ class Unit(pygame.sprite.Sprite):
         # Prevent negative HP
         enemy.curHP = targetHP if targetHP > 0 else 0
 
+    def openDoor(self, doors):
+        for door in doors:
+            top, bottom = self.rect.top, self.rect.bottom
+            left, right = self.rect.left, self.rect.right
+
+            if door.rect.collidepoint(right+25,top+25):
+                return door
+            elif door.rect.collidepoint(left-25,top+25):
+                return door
+            elif door.rect.collidepoint(left+25,top-25):
+                return door
+            elif door.rect.collidepoint(left+25,bottom+25):
+                return door
 
     def move(self, key, collidable):
         """Move your self in one of the 4 directions according to key"""
@@ -116,6 +129,22 @@ class Unit(pygame.sprite.Sprite):
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
+
+    def select(self):
+        if self.team == "blue":
+            sprite = "blue_unit_sel.png"
+            self.image = pygame.image.load(os.path.join("images", sprite))
+        else:
+            sprite = "red_unit_sel.png"
+            self.image = pygame.image.load(os.path.join("images", sprite))
+            
+    def deselect(self):
+        if self.team == "blue":
+            sprite = "blue_unit.png"
+            self.image = pygame.image.load(os.path.join("images", sprite))
+        else:
+            sprite = "red_unit.png"
+            self.image = pygame.image.load(os.path.join("images", sprite))
 
     def rot_unit(self, image, rect, direction, next_move):
         """rotate an image while keeping its center"""

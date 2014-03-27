@@ -7,7 +7,7 @@ from unit import Unit
 class Map:
     def __init__(self):
         self.map_width = 17
-        self.map_height = 17
+        self.map_height = 15
         self.pix_width = 50
         self.pix_height = 50
         self.margin = 1

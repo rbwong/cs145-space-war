@@ -5,15 +5,22 @@ from pygame.locals import *
 class Tile(pygame.sprite.Sprite):
     def __init__(self, rect, floortype="black"):
         self.floortype = floortype # "black", "normal", "snow#"
-        self.walkable = False if self.floortype == "black" else True
         self.collide = False
 
         if self.floortype == "black":
+            self.collide = True
+        if self.floortype == "doorch":
+            self.collide = True
+        if self.floortype == "doorcv":
             self.collide = True
 
         self.spriteDict = {
             "normal" : "floor.png",
             "black" : "black.png",
+            "dooroh" : "door_oh.png",
+            "doorch" : "door_ch.png",
+            "doorov" : "door_ov.png",
+            "doorcv" : "door_cv.png",
             "snow1" : "floor_ice1.png",
             "snow2" : "floor_ice2.png",
             "snow3" : "floor_ice3.png",
