@@ -8,7 +8,9 @@ from tile import Tile
 from unit import Unit
 
 BLACK = (0,0,0)
-
+GREEN = (0,255,0)
+RED = (255,0,0)
+BLUE = (0,0,255)
 UnitList = {
     "Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
     "Heavy Gunner" : {"HP" : 15, "AP" : 6, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1,  "sprite" : "rheavy_down.png"}
@@ -50,7 +52,8 @@ if __name__ == "__main__":
 	grid, done, clock, screen, size, tiles = initialize_map()
 
 	#environment
-	turn = "red"
+	turn = "Red"
+	color = RED
 	selected_unit = None
 
 	# Love is an open DOOOR
@@ -142,25 +145,25 @@ if __name__ == "__main__":
 					
 				elif(event.key == K_RETURN):
 					selected_unit.deselect()
-					if turn == "red":
-						turn = "blue"
+					if turn == "Red":
+						turn = "Blue"
+						color = BLUE
 						for unit in red_units:
 							unit.AP = 6
 						selected_unit = blue_units.sprites()[0]
-					elif turn == "blue":
-						turn = "red"
+					elif turn == "Blue":
+						turn = "Red"
+						color = RED
 						for unit in blue_units:
 							unit.AP = 6
 						selected_unit = red_units.sprites()[0]
 					selected_unit.select()
-					print turn	
 
 			elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 				x,y = event.pos
-
 				flag = False
 				for unit in red_units:
-					if unit.rect.collidepoint(x,y) and turn == "red" and unit.team == "red":
+					if unit.rect.collidepoint(x,y) and turn == "Red" and unit.team == "red":
 						selected_unit.deselect()
 						selected_unit = unit
 						selected_unit.select()
@@ -168,21 +171,28 @@ if __name__ == "__main__":
 
 				if not flag:
 					for unit in blue_units:
-						if unit.rect.collidepoint(x,y) and turn == "blue" and unit.team == "blue":
+						if unit.rect.collidepoint(x,y) and turn == "Blue" and unit.team == "blue":
 							selected_unit.deselect()
 							selected_unit = unit
 							selected_unit.select()
-				print selected_unit.AP
 
 		tiles.draw(screen)
 		doors.draw(screen)
 		red_units.draw(screen)
 		blue_units.draw(screen)
+		fontobject1 = pygame.font.Font(None,22)
+		fontobject2 = pygame.font.Font(None,90)
+		screen.blit(fontobject1.render(turn+" Player's Turn",1,color),(grid.pix_width*13, grid.pix_height/3))
+		if selected_unit.AP > 0:
+			screen.blit(fontobject1.render("Current AP: "+str(selected_unit.AP), 1, GREEN),(grid.map_width/8*grid.pix_width, grid.pix_height/3))
+		else:
+			screen.blit(fontobject1.render("Current AP: "+str(selected_unit.AP), 1, RED),(grid.map_width/8*grid.pix_width, grid.pix_height/3))
+		
 		if not blue_units.sprites() and red_units.sprites():
-			print "RED WINS!"
-			break
+			screen.blit(fontobject2.render("THE SHIP IS OURS!",1,RED),(grid.map_width/5*grid.pix_width,grid.map_height/3*grid.pix_height))
+			continue
 		elif not red_units.sprites() and blue_units.sprites():
-			print "BLUE WINS!"
-			break
+			screen.blit(fontobject2.render("THE SHIP IS OURS!",1,BLUE),(grid.map_width/5*grid.pix_width,grid.map_height/3*grid.pix_height))
+			continue
 		pygame.display.flip()
 		pass

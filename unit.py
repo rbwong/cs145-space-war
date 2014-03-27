@@ -138,11 +138,18 @@ class Unit(pygame.sprite.Sprite):
 
 	def select(self):
 		if self.team == "blue":
-			sprite = "blue_unit_sel.png"
+			if self.AP > 0:
+				sprite = "blue_unit_sel.png"
+			else:
+				sprite = "blue_unit_out.png"
 			self.image = pygame.image.load(os.path.join("images", sprite))
 			self.image, self.rect = self.rot_unit(self.image, self.rect, K_UP, self.direction)
+				
 		else:
-			sprite = "red_unit_sel.png"
+			if self.AP > 0:
+				sprite = "red_unit_sel.png"
+			else:
+				sprite = "red_unit_out.png"
 			self.image = pygame.image.load(os.path.join("images", sprite))
 			self.image, self.rect = self.rot_unit(self.image, self.rect, K_UP, self.direction)
 			
