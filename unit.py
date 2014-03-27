@@ -2,9 +2,6 @@ import os, sys
 import pygame
 from pygame.locals import *
 
-UnitList = {"Rifleman" : {"HP" : 10, "AP" : 10, "attack": 3, "defense" : 0 , "walkCost" : 1, "turnCost" : 0},
-            "Heavy Gunner" : {"HP" : 15, "AP" : 10, "attack": 8, "defense" : 2 , "walkCost" : 2, "turnCost" : 1}}
-
 class Unit(pygame.sprite.Sprite):
     def __init__(self, rect, unitName, unitDef, team):
         # Intrinsic Properties
@@ -53,25 +50,28 @@ class Unit(pygame.sprite.Sprite):
                           "Hand2" : None,
                           "Legs" : None,
                           "Mount" : None}
-        self.items = None 
+		self.items = None 
 
-    def totalAttack(self):
-        bonusAttack = 0 # total bonus attack from items, etc.
-        return self.attack + bonusAttack
+	def interact(self):
+		self.AP -= 1	
+		
+	def totalAttack(self):
+		bonusAttack = 0 # total bonus attack from items, etc.
+		return self.attack + bonusAttack
 
-    def totalDefense(self):
-        bonusDefense = 0 # total bonus defense from items, etc.
-        return self.defense + bonusDefense
+	def totalDefense(self):
+		bonusDefense = 0 # total bonus defense from items, etc.
+		return self.defense + bonusDefense
 
-    def attackEnemy(self, enemy):
-        #TODO check for friendly fire (self.team == enemy.team)
+	def attackEnemy(self, enemy):
+		#TODO check for friendly fire (self.team == enemy.team)
 
-        # calculate damage
-        damage = self.totalAttack() - enemy.totalDefense()
-        # Deal a minimum damage of 1 if attack <= enemy defense
-        targetHP = enemy.curHP - (damage if damage > 0 else 1)
-        # Prevent negative HP
-        enemy.curHP = targetHP if targetHP > 0 else 0
+		# calculate damage
+		damage = self.totalAttack() - enemy.totalDefense()
+		# Deal a minimum damage of 1 if attack <= enemy defense
+		targetHP = enemy.curHP - (damage if damage > 0 else 1)
+		# Prevent negative HP
+		enemy.curHP = targetHP if targetHP > 0 else 0
 
     def openDoor(self, doors):
         for door in doors:
@@ -79,13 +79,17 @@ class Unit(pygame.sprite.Sprite):
             left, right = self.rect.left, self.rect.right
 
             if door.rect.collidepoint(right+25,top+25) and self.direction == K_RIGHT:
-                return door
-            elif door.rect.collidepoint(left-25,top+25)  and self.direction == K_LEFT:
-                return door
-            elif door.rect.collidepoint(left+25,top-25)  and self.direction == K_UP:
-                return door
-            elif door.rect.collidepoint(left+25,bottom+25)  and self.direction == K_DOWN:
-                return door
+				self.interact()
+				return door
+			elif door.rect.collidepoint(left-25,top+25)  and self.direction == K_LEFT:
+				self.interact()
+				return door
+			elif door.rect.collidepoint(left+25,top-25)  and self.direction == K_UP:
+				self.interact()
+				return door
+			elif door.rect.collidepoint(left+25,bottom+25)  and self.direction == K_DOWN:
+				self.interact()
+				return door
 
     def move(self, key, collidable):
         """Move your self in one of the 4 directions according to key"""
@@ -111,11 +115,11 @@ class Unit(pygame.sprite.Sprite):
         #remove self from collidable
         collidable_objects = list(collidable)
         collidable_objects.remove(self)
-        
+        collided = False	#check collision
         self.rect.move_ip(xMove,0);
 
-        block_hit_list = pygame.sprite.spritecollide(self, collidable_objects, False)
-        for block in block_hit_list:
+        block_hit_list_x = pygame.sprite.spritecollide(self, collidable_objects, False)
+        for block in block_hit_list_x:
             if xMove > 0:
                 self.rect.right = block.rect.left
             else:
@@ -123,12 +127,14 @@ class Unit(pygame.sprite.Sprite):
 
         self.rect.move_ip(0,yMove);
 
-        block_hit_list = pygame.sprite.spritecollide(self, collidable_objects, False)
-        for block in block_hit_list:
+        block_hit_list_y = pygame.sprite.spritecollide(self, collidable_objects, False)
+        for block in block_hit_list_y:
             if yMove > 0:
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
+		if not block_hit_list_x and not block_hit_list_y:
+			self.interact()
 
     def select(self):
         if self.team == "blue":

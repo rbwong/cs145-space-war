@@ -118,52 +118,71 @@ if __name__ == "__main__":
     #get all collidable objects
     collidable =  get_collidable_objects(tiles, red_units, blue_units, doors)
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: 
-                sys.exit()
-            elif event.type == KEYDOWN:
-                if ((event.key == K_RIGHT)
-                or (event.key == K_LEFT)
-                or (event.key == K_UP)
-                or (event.key == K_DOWN)):
-                    selected_unit.move(event.key, collidable)
+	while True:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT: 
+				sys.exit()
+			elif event.type == KEYDOWN:
+				if event.key in (K_RIGHT, K_LEFT, K_UP, K_DOWN):
+					if selected_unit.AP > 0:
+						selected_unit.move(event.key, collidable)
 
-                elif (event.key == K_e):
-                    door = selected_unit.openDoor(doors)
-                    if door and not door.open:
-                        collidable.remove(door)
-                        door.open = True
-                        door.setDoor()
+				elif (event.key == K_e):
+					if selected_unit.AP > 0:
+						door = selected_unit.openDoor(doors)
+						if door:
+							collidable.remove(door)
+							door.open = True
+							door.setDoor()
 
-                elif (event.key == K_SPACE):
-                    pass
+				elif (event.key == K_SPACE):
+					pass
 
-                    direction = selected_unit.direction
-                    
+					direction = selected_unit.direction
+					
+				elif(event.key == K_RETURN):
+					selected_unit.deselect()
+					if turn == "red":
+						turn = "blue"
+						for unit in red_units:
+							unit.AP = 6
+						selected_unit = blue_units.sprites()[0]
+					elif turn == "blue":
+						turn = "red"
+						for unit in blue_units:
+							unit.AP = 6
+						selected_unit = red_units.sprites()[0]
+					selected_unit.select()
+					print turn	
 
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                x,y = event.pos
+			elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+				x,y = event.pos
 
-                flag = False
-                for unit in red_units:
-                    if unit.rect.collidepoint(x,y):
-                        selected_unit.deselect()
-                        selected_unit = unit
-                        selected_unit.select()
-                        flag = True
+				flag = False
+				for unit in red_units:
+					if unit.rect.collidepoint(x,y) and turn == "red" and unit.team == "red":
+						selected_unit.deselect()
+						selected_unit = unit
+						selected_unit.select()
+						flag = True
 
-                if not flag:
-                    for unit in blue_units:
-                        if unit.rect.collidepoint(x,y):
-                            selected_unit.deselect()
-                            selected_unit = unit
-                            selected_unit.select()
-
+				if not flag:
+					for unit in blue_units:
+						if unit.rect.collidepoint(x,y) and turn == "blue" and unit.team == "blue":
+							selected_unit.deselect()
+							selected_unit = unit
+							selected_unit.select()
+				print selected_unit.AP
 
         tiles.draw(screen)
         doors.draw(screen)
         red_units.draw(screen)
         blue_units.draw(screen)
+		if not blue_units.sprites() and red_units.sprites():
+			print "RED WINS!"
+			break
+		elif not red_units.sprites() and blue_units.sprites():
+			print "BLUE WINS!"
+			break
         pygame.display.flip()
         pass
