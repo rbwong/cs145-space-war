@@ -25,8 +25,8 @@ class Unit(pygame.sprite.Sprite):
             self.direction = K_UP
 
         #tile movement rate
-        self.x_dist = 51
-        self.y_dist = 51
+        self.x_dist = 50
+        self.y_dist = 50
 
         # pygame
         pygame.sprite.Sprite.__init__(self)

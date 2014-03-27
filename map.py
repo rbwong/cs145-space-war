@@ -10,7 +10,7 @@ class Map:
         self.map_height = 15
         self.pix_width = 50
         self.pix_height = 50
-        self.margin = 1
+        self.margin = 0
 
         with open("map.txt") as myfile: #load map from txt
             self.grid = [row.split(";") for row in myfile]

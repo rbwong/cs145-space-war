@@ -27,7 +27,7 @@ def initialize_map():
     tiles = pygame.sprite.Group()
     for x in range(grid.map_width):
         for y in range(grid.map_height):
-            tiles.add(Tile(pygame.Rect(x*51, y*51, 50, 50), grid.grid[y][x]))
+            tiles.add(Tile(pygame.Rect(x*50, y*50, 50, 50), grid.grid[y][x]))
 
     return grid, done, clock, screen, size, tiles
 
@@ -49,9 +49,9 @@ if __name__ == "__main__":
 
     # Draw units (experimental)
     units = pygame.sprite.Group()
-    sample_red = Unit(pygame.Rect(12*51, 15*51, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
+    sample_red = Unit(pygame.Rect(12*50, 15*50, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "red")
     units.add(sample_red)
-    sample_blue = Unit(pygame.Rect(8*51, 3*51, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
+    sample_blue = Unit(pygame.Rect(8*50, 3*50, 50, 50), "Heavy Gunner", UnitList["Heavy Gunner"], "blue")
     units.add(sample_blue)
 
     selected_unit = sample_red
