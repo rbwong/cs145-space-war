@@ -55,7 +55,7 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 
             elif (key_pressed == str(K_e)):
                 door = selected_unit.openDoor(doors)
-                if door:
+                if door and not door.open:
                     collidable.remove(door)
                     door.open = True
                     door.setDoor()
