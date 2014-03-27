@@ -8,7 +8,7 @@ import datetime
 import connection
 
 host = ''
-port = 8888
+port = 5679
 key = '70d9573de68a1fa96488b8fbfb9476c8'
 
 """
@@ -17,6 +17,7 @@ client_table schema {
 
 	'addr': addr,
 	'connection_layer': None
+	'team': blue/red
 	'username': 'Anonymous'
 	'status': None
 	'thread': new_client	
@@ -62,6 +63,12 @@ def command_processor():
 				#send message
 				elif 'message' in args:
 					send(receipient=int(args['receipient']), sender=client_id, message=args['message'])
+				#key events
+				elif 'key' in args:
+					send_key(sender=client_id, args=args)
+				#mouse events
+				elif 'mouse' in args:
+					send_key(sender=client_id, args=args)
 			elif command == 'GET':
 				args = parse_headers(headers)
 
@@ -76,7 +83,6 @@ def command_processor():
 
 def client(remote_socket, client_id):
 	connection_layer = connection.connection(remote_socket)
-	connection_layer.sendMessage("Client connected!")
 
 	#set connection_layer in 'db'
 	client_table[client_id]['connection_layer'] = connection_layer
@@ -99,15 +105,19 @@ def accept_clients(s):
 
 		new_client = Thread(target = client, args = ((remote_socket, id_counter)))
 
+		team = 'blue' if id_counter == 69 else 'red'
 		client_table[id_counter] = {
 						'addr': addr,
 						'connection_layer': None,
+						'team': team,
 						'username': 'Anonymous',
 						'status': '',
 						'thread': new_client
 						}
 		new_client.start()
 		id_counter += 1
+		if id_counter == 71:
+			break
 
 def parse_message(message):
 	raw = message.split('\r\n\n')
@@ -143,12 +153,20 @@ def set_status(client_id, status):
 
 def send(receipient=None, sender=None, message=''):
 	if receipient and receipient != 0:
-		client_table[receipient]['connection_layer'].sendMessage(client_table[sender]['username'] + ': ' + message)
+		client_table[receipient]['connection_layer'].sendMessage(client_table[sender]['username'] + '(' + client_table[sender]['team'] + ')' + ': ' + message)
 	elif receipient == 0:
 		for key in client_table.keys():
-			client_table[key]['connection_layer'].sendMessage(client_table[sender]['username'] + ': ' + message)
+			client_table[key]['connection_layer'].sendMessage(client_table[sender]['username'] + '(' + client_table[sender]['team'] + ')' + ': ' + message)
 	else:
 		print "debug: Send - no target"
+
+def send_key(sender=None, args=''):
+	if 'key' in args:
+		for key in client_table.keys():
+				client_table[key]['connection_layer'].sendMessage('team: ' + client_table[sender]['team'] + '\r\n' + 'key: ' + args['key'])
+	if 'mouse' in args:
+		for key in client_table.keys():
+				client_table[key]['connection_layer'].sendMessage('team: ' + client_table[sender]['team'] + '\r\n' + 'key: ' + args['mouse']  + '\r\n' + 'x: ' + args['x'] + '\r\n' + 'y: ' + args['y'])
 
 if __name__ == "__main__":
 	s = socket.socket()
