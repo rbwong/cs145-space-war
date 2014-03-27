@@ -4,6 +4,7 @@ import socket
 import connection
 from threading import Thread
 from random import random
+import datetime
 
 import os, sys
 import pygame
@@ -28,6 +29,7 @@ class Environment:
 	def __init__(self):
 		self.turn = "Red"
 		self.team = None
+		self.quit = False
 
 BLACK = (0,0,0)
 GREEN = (0,255,0)
@@ -61,9 +63,10 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 
 		headers = parse_headers(recv_msg)
 
-		if recv_msg == ('QUIT2 ' + key):
-			connection_layer.sendMessage('QUIT3 ' + key + '\r\n\ndate: january')
+		if recv_msg == ('QUIT2: ' + key):
+			connection_layer.sendMessage('QUIT3 ' + key + '\r\n\ndate: ' + str(datetime.datetime.now()))
 			connection_layer.disconnect()
+			genv.quit = True
 			break
 		elif 'assign' in headers:
 			genv.team = headers['assign']
@@ -86,10 +89,10 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 				if selected_unit.AP > 0:
 					target, dist = selected_unit.fire(projectiles, collidable, grid, screen)
 					if isinstance(target, Unit):
-						kill = random()
-						print "killchance:", str(kill), "dist:", str(dist)
-						if kill < 0.17*(0.9 ** dist):
-							print "killchance:", str(kill)
+						kill = float(headers['hit-rate'])
+
+						if kill < 0.30*(0.9 ** dist):
+
 							if target.team =="red":
 								red_units.remove(target)
 							else:
@@ -157,10 +160,11 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 
 		else:
 			finalquit = False
-		print recv_msg
 
-def get_input(connection_layer):
-	while True:
+		print 'receive_message dead'
+
+def get_input(connection_layer, genv):
+	while not genv.quit:
 		send_msg = raw_input('')
 		send_msg = send_msg.split(' ')
 
@@ -182,6 +186,9 @@ def get_input(connection_layer):
 			connection_layer.sendMessage('GET\r\n\nuser: all')
 		else:
 			print send_msg[0] + ": command not recognized"
+
+	print 'get_input dead'
+	sys.exit()
 
 def initialize_map():
 	grid = Map()
@@ -301,8 +308,8 @@ if __name__ == "__main__":
 	#start network threads
 	receiver_thread = Thread(target=receive_message, args=(connection_layer, pygame, screen, tiles, doors, blue_units, red_units, selected_unit, collidable, projectiles, genv))
 	receiver_thread.start()
-	receiver_thread = Thread(target=get_input, args=(connection_layer,))
-	receiver_thread.start()
+	#receiver_thread = Thread(target=get_input, args=(connection_layer, genv))
+	#receiver_thread.start()
 
 	while not genv.team:
 		pass
@@ -320,14 +327,21 @@ if __name__ == "__main__":
 		screen.blit(fontobject1.render("Current AP: "+str(selected_unit.AP), 1, RED),(grid.map_width/8*grid.pix_width, grid.pix_height/3))
 	pygame.display.flip()
 
-	while True:
+	kill_thread = False
+	while True and not kill_thread:
 		for event in pygame.event.get():
+			if event.type == pygame.QUIT: 
+				connection_layer.sendMessage('QUIT ' + key + '\r\n\ndate: ' + str(datetime.datetime.now()))
+				finalquit = True
+				kill_thread = True
+				break
+
 			if genv.turn == genv.team:
-				if event.type == pygame.QUIT: 
-					sys.exit()
-				elif event.type == KEYDOWN:
+				if event.type == KEYDOWN:
 					connection_layer.sendMessage('SET\r\n\nkey: ' + str(event.key))
 
 				elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 					x,y = event.pos
 					connection_layer.sendMessage('SET\r\n\nmouse: ' + 'left_mouse\r\n' + 'x: ' + str(x) + '\r\ny: ' + str(y))
+
+	print 'main dead'

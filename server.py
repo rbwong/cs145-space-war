@@ -2,6 +2,8 @@
 
 from threading import Thread
 from time import sleep
+from random import random
+
 import sys, os
 import socket
 import datetime
@@ -77,7 +79,7 @@ def command_processor():
 					get_user(client_id, args['user'])
 			elif command == 'QUIT ' + key:
 				client_table[client_id]['finalquit'] = True
-				connection_layer.sendMessage('QUIT2 ' + key)
+				connection_layer.sendMessage('QUIT2: ' + key)
 			else:
 				connection_layer.sendMessage("I can't understand what you're saying")
 
@@ -161,10 +163,15 @@ def send(receipient=None, sender=None, message=''):
 	else:
 		print "debug: Send - no target"
 
+#Player actions
 def send_key(sender=None, args=''):
+	hit = random()
 	if 'key' in args:
 		for key in client_table.keys():
-				client_table[key]['connection_layer'].sendMessage('team: ' + client_table[sender]['team'] + '\r\n' + 'key: ' + args['key'])
+				if args['key'] == "32": #if attack
+					client_table[key]['connection_layer'].sendMessage('team: ' + client_table[sender]['team'] + '\r\n' + 'key: ' + args['key'] + '\r\n' + 'hit-rate: ' + str(hit))
+				else: 
+					client_table[key]['connection_layer'].sendMessage('team: ' + client_table[sender]['team'] + '\r\n' + 'key: ' + args['key'])
 	if 'mouse' in args:
 		for key in client_table.keys():
 				client_table[key]['connection_layer'].sendMessage('team: ' + client_table[sender]['team'] + '\r\n' + 'key: ' + args['mouse']  + '\r\n' + 'x: ' + args['x'] + '\r\n' + 'y: ' + args['y'])
