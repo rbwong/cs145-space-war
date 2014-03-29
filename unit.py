@@ -63,6 +63,7 @@ class Unit(pygame.sprite.Sprite):
 		self.x = -1
 		self.y = -1
 		self.overwatch = False
+		self.dead = False
 
 		# Future features
 		self.equipment = {"Head" : None,
