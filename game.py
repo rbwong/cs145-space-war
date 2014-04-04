@@ -75,24 +75,31 @@ def receive_message(connection_layer, pygame, screen, tiles, doors, blue_units, 
 			key_pressed = headers['key']
 			if key_pressed in (str(K_LEFT),str(K_RIGHT),str(K_DOWN),str(K_UP)):
 				if selected_unit.AP > 0:
+					pygame.mixer.music.load(os.path.join("SFX/marine/walk", "00.wav"))
+					pygame.mixer.music.play(0)
 					selected_unit.move(int(key_pressed), collidable)
 
 			elif (key_pressed == str(K_e)):
 				if selected_unit.AP > 0:
 					door = selected_unit.openDoor(doors)
 					if door and not door.open:
+						pygame.mixer.music.load(os.path.join("SFX", "door.wav"))
+						pygame.mixer.music.play(0)
 						collidable.remove(door)
 						door.open = True
 						door.setDoor()
 
 			elif (key_pressed == str(K_SPACE)):
 				if selected_unit.AP > 0:
+					pygame.mixer.music.load(os.path.join("SFX", "shoot.wav"))
+					pygame.mixer.music.play(0)
 					target, dist = selected_unit.fire(projectiles, collidable, grid, screen)
 					if isinstance(target, Unit):
 						kill = float(headers['hit-rate'])
 
 						if kill < 0.30*(0.9 ** dist):
-
+							#pygame.mixer.music.load(os.path.join("SFX/marine/die", "0.wav"))
+							#pygame.mixer.music.play(0)
 							if target.team =="red":
 								red_units.remove(target)
 							else:
